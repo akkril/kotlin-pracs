@@ -1,14 +1,14 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main() {
-    val name = "Kotlin"
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    println("Hello, " + name + "!")
+    val tracker = ExpenseTracker()
 
-    for (i in 1..5) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        println("i = $i")
-    }
+    // Пример добавления расходов
+    tracker.addExpense(150.0, "Еда")
+    tracker.addExpense(200.0, "Транспорт")
+    tracker.addExpense(50.0, "Еда")
+
+    // Вывод всех расходов
+    tracker.showAllExpenses()
+
+    // Подсчет суммы расходов по категориям
+    tracker.showExpensesByCategory()
 }
