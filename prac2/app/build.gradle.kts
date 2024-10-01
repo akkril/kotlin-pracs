@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "ru.mirea.prac2"
+    namespace = "com.example.prac2"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.mirea.prac2"
+        applicationId = "com.example.prac2"
         minSdk = 29
         targetSdk = 34
         versionCode = 1

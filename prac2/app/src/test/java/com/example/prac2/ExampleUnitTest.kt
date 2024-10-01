@@ -1,4 +1,4 @@
-package ru.mirea.prac2
+package com.example.prac2
 
 import org.junit.Test
 
