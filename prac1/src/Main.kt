@@ -1,4 +1,5 @@
 fun main() {
+    // Создаем экземпляр класса ExpenseTracker для отслеживания расходов
     val tracker = ExpenseTracker()
 
     // Пример добавления расходов
