@@ -24,9 +24,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityMainBinding
-
     private var imageCapture: ImageCapture? = null
-
     private lateinit var cameraExecutor: ExecutorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,14 +32,14 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        // Request camera permissions
+        // Запрашиваем разрешения для работы с камерой
         if (allPermissionsGranted()) {
             startCamera()
         } else {
             requestPermissions()
         }
 
-        // Set up the listener for take photo button
+        // Устанавливаем обработчики для кнопок
         viewBinding.btnCaptureImage.setOnClickListener { takePhoto() }
         viewBinding.btnGallery.setOnClickListener { openGallery() }
 
@@ -49,30 +47,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-
-        //Сохраняет дату в файл photos/date.txt
+        // Сохраняем текущую дату и время в файл
         val dateFormat = SimpleDateFormat(FILENAME_FORMAT, Locale.getDefault())
         val date = dateFormat.format(System.currentTimeMillis())
 
         try {
             val photosDir = File(baseContext.filesDir, "photos")
             if (!photosDir.exists()) {
-                photosDir.mkdir()
+                photosDir.mkdir() // Создаем папку, если она не существует
             }
             val dateFile = File(photosDir, "date.txt")
             if (!dateFile.exists()) {
-                dateFile.createNewFile()
-                dateFile.writeText("$date\n")
+                dateFile.createNewFile() // Создаем файл, если его нет
             }
-            else {
-                dateFile.appendText("$date\n")
-            }
+            // Записываем дату в файл
+            dateFile.appendText("$date\n")
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
+
     private fun openGallery() {
+        // Открываем активность с галереей
         val intent = Intent(this, GalleryActivity::class.java)
         startActivity(intent)
     }
@@ -81,31 +77,21 @@ class MainActivity : AppCompatActivity() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
-                }
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
+            }
 
             imageCapture = ImageCapture.Builder().build()
 
-            // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
-                // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
-
-                // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture)
-
-            } catch(exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
+                cameraProvider.unbindAll() // Отвязываем предыдущие случаи использования камеры
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture) // Привязываем к жизненному циклу
+            } catch (exc: Exception) {
+                Log.e(TAG, "Не удалось привязать use case", exc)
             }
 
         }, ContextCompat.getMainExecutor(this))
@@ -116,43 +102,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-            baseContext, it) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        cameraExecutor.shutdown()
+        cameraExecutor.shutdown() // Останавливаем поток выполнения
     }
 
     companion object {
         private const val TAG = "CameraXApp"
-        private const val FILENAME_FORMAT = "yyyy-dd-MM-HH-mm-ss-SSS"
-        private val REQUIRED_PERMISSIONS =
-            mutableListOf (
-                Manifest.permission.CAMERA
-            ).apply {
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                }
-            }.toTypedArray()
+        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS" // Формат для сохранения даты и времени
+        private val REQUIRED_PERMISSIONS = mutableListOf(Manifest.permission.CAMERA).apply {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }.toTypedArray() // Массив необходимых разрешений
     }
 
-    private val activityResultLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions())
-        { permissions ->
-            // Handle Permission granted/rejected
-            var permissionGranted = true
-            permissions.entries.forEach {
-                if (it.key in REQUIRED_PERMISSIONS && it.value == false)
-                    permissionGranted = false
-            }
-            if (!permissionGranted) {
-                Toast.makeText(baseContext,
-                    "Permission request denied",
-                    Toast.LENGTH_SHORT).show()
-            } else {
-                startCamera()
-            }
+    // Запрос разрешений через ActivityResultLauncher
+    private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        var permissionGranted = true
+        permissions.entries.forEach {
+            if (it.key in REQUIRED_PERMISSIONS && it.value == false) permissionGranted = false
         }
+        if (!permissionGranted) {
+            Toast.makeText(baseContext, "Запрос на разрешение отклонен", Toast.LENGTH_SHORT).show()
+        } else {
+            startCamera() // Если разрешения выданы, запускаем камеру
+        }
+    }
 }

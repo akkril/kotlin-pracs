@@ -18,10 +18,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:backgroundTint="#000000"
+        app:backgroundTint="#7F000000"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:ignore="BottomAppBar" />
+        tools:ignore="BottomAppBar"
+        tools:layout_editor_absoluteX="16dp" />
 
     <ImageButton
         android:id="@+id/btnCaptureImage"
